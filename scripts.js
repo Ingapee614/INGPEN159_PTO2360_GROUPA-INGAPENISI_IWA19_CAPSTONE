@@ -1,6 +1,91 @@
-matches = books
-page = 1;
+import { BOOKS_PER_PAGE,books,authors,genres } from "./data.js"; // The script imports constants (BOOKS_PER_PAGE, books, authors, genres) from a separate data script.
 
+
+//object literal to reference elements
+
+const dataObject = {
+    
+    header: {search: document.querySelector("[data-header-search]"),
+             settings: document.querySelector("[data-header-settings]"),
+             help: document.querySelector("[data-header-help]"),
+             add: document.querySelector("[data-header-add]"),
+             order: document.querySelector("[data-header-order]"),
+             grid: document.querySelector("[data-header-grid]"),
+             list: document.querySelector("[data-header-list]"),
+             title: document.querySelector("[data-header-title]"),
+             subtitle: document.querySelector("[data-header-subtitle]"), },
+    list: {items: document.querySelector("[data-list-items]"),
+           button: document.querySelector("[data-list-button]"),
+           message: document.querySelector("[data-list-message]"),
+           active: document.querySelector("[data-list-active]"),
+           close: document.querySelector("[data-list-close]"),
+           blur: document.querySelector("[data-list-blur]"),
+           image: document.querySelector("[data-list-image]"),
+           title: document.querySelector("[data-list-title]"),
+           subtitle: document.querySelector("[data-list-subtitle]"),
+           description: document.querySelector("[data-list-description]"),},
+    search: {overlay: document.querySelector("[data-search-overlay]"),
+             form: document.querySelector("[data-search-form]"),
+             cancel: document.querySelector("[data-search-cancel]"),
+             title: document.querySelector("[data-search-title]"),
+             genres: document.querySelector("[data-search-genres]"),
+             authors: document.querySelector("[data-search-authors]"),},
+    settings: {overlay: document.querySelector("[data-settings-overlay]"),
+               form: document.querySelector("[data-settings-form]"),
+               cancel: document.querySelector("[data-settings-cancel]"),
+               theme: document.querySelector("[data-settings-theme]"), },
+  };
+//preview creates a button for books available
+  const createBookElement = ({ author, image, title, id }) => {
+    const preview = document.createElement("button");
+    preview.classList = "preview";
+    preview.setAttribute("book-id", id);
+    preview.innerHTML = /* html */ `
+    <img class="preview__image" src="${image}"/>
+  
+      <div class="preview__info">
+        <h3 class="preview__title">${title}</h3>
+        <div class="preview__author">${authors[author]}</div>
+    </div>`;
+  
+    return preview;
+  };
+
+  //display results to the user (0 to 36 BOOKS_PER_PAGE)
+
+let pageDisplay = [];
+/** 
+ * @param {object} object - object that you want to extract the initial results from.
+ * @returns {array} - Returns the  results 
+ */
+const extractDisplay = (object) => {
+  pageDisplay = object.slice(0, BOOKS_PER_PAGE);
+  return pageDisplay;
+};
+
+extractDisplay(books);
+
+let pageBooks = books.slice(0, BOOKS_PER_PAGE);// books displayed on current page
+const listFragment = document.createDocumentFragment();
+
+const renderBookList = (object, fragment) => { //try change render
+    for (let { author, image, title, id } of object) {
+      const preview = createBookElement({
+        author,
+        image,
+        title,
+        id,
+      });
+  
+      fragment.appendChild(preview);
+      dataObject.list.items.appendChild(fragment);
+    }
+  };
+  renderBookList(pageBooks, listFragment);// first page to load
+
+
+
+/*
 if (!books && !Array.isArray(books)) throw new Error('Source required') 
 if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
 
@@ -69,7 +154,7 @@ data-list-button = "Show more (books.length - BOOKS_PER_PAGE)"
 
 data-list-button.disabled = !(matches.length - [page * BOOKS_PER_PAGE] > 0)
 
-data-list-button.innerHTML = /* html */ [
+data-list-button.innerHTML = /* html *//* [
     '<span>Show more</span>',
     '<span class="list__remaining"> (${matches.length - [page * BOOKS_PER_PAGE] > 0 ? matches.length - [page * BOOKS_PER_PAGE] : 0})</span>',
 ]
@@ -124,7 +209,7 @@ data-search-form.click(filters) {
         element.classList = 'preview'
         element.setAttribute('data-preview', id)
 
-        element.innerHTML = /* html */ `
+        element.innerHTML = /* html *//* `
             <img
                 class="preview__image"
                 src="${image}"
@@ -144,7 +229,7 @@ data-search-form.click(filters) {
     remaining === hasRemaining ? initial : 0
     data-list-button.disabled = initial > 0
 
-    data-list-button.innerHTML = /* html */ `
+    data-list-button.innerHTML = /* html *//* `
         <span>Show more</span>
         <span class="list__remaining"> (${remaining})</span>
     `
@@ -182,4 +267,4 @@ data-list-items.click() {
     
     data-list-subtitle === '${authors[active.author]} (${Date(active.published).year})'
     data-list-description === active.description
-}
+}*/
