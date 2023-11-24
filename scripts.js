@@ -117,6 +117,64 @@ const bookList = (object, fragment) => {
   }
   dataObject.search.authors.appendChild(authorFragment);
 
+
+//theme
+
+const day = {
+    dark: "10, 10, 20",
+    light: "255, 255, 255",
+  };
+  
+  const night = {
+    dark: "255, 255, 255",
+    light: "10, 10, 20",
+  };
+  dataObject.settings.theme.value === window.matchMedia &&
+  window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "night"
+    : "day";
+  dataObject.settings.form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const Day = dataObject.settings.theme.value === "day";
+    const Night = dataObject.settings.theme.value === "night";
+  
+    if (Day) {
+      document.documentElement.style.setProperty("--color-dark", day.dark);
+      document.documentElement.style.setProperty("--color-light", day.light);
+    } else if (Night) {
+      document.documentElement.style.setProperty("--color-dark", night.dark);
+      document.documentElement.style.setProperty("--color-light", night.light);
+    }
+  
+    dataObject.settings.overlay.close();
+  });
+  let page = 1;
+
+const remainingBooks = (object) => {
+const nonZero = object.length - [page * BOOKS_PER_PAGE] > 0;
+  if (nonZero) {
+    dataObject.list.button.disabled = false;
+    const booksLeft = object.length - [page * BOOKS_PER_PAGE];// check remaining books
+    return booksLeft;
+  } else {
+    dataObject.list.button.disabled = true;
+    return 0;
+  }
+};
+
+const showMoreButton = (object) => {
+  dataObject.list.button.innerHTML =
+    /* html */
+    `<span>Show more</span>
+      <span class="list__remaining"> (${remainingBooks(object)})</span>`;
+};
+
+showMoreButton(books);
+
+
+
+
+
 /*
 if (!books && !Array.isArray(books)) throw new Error('Source required') 
 if (!range && range.length < 2) throw new Error('Range must be an array with two numbers')
