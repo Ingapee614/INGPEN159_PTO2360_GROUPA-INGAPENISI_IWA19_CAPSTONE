@@ -148,6 +148,13 @@ const day = {
   
     dataObject.settings.overlay.close();
   });
+
+
+  /** `page` represents the 'page' that we are on relating to the `BOOKS_PER_PAGE`.
+ * This is used for pagination when it comes to the `showMoreHandler`(Show more button).
+ * @example If we are on page 1, show the first 36 books.
+ * If we are on page 2, show the next 36 books.
+ */
   let page = 1;
 
 const remainingBooks = (object) => {
@@ -171,8 +178,152 @@ const showMoreButton = (object) => {
 
 showMoreButton(books);
 
+//event listerners
+dataObject.header.settings.addEventListener("click", (event) => {
+    dataObject.settings.overlay.show();
+  });
+  
+  dataObject.settings.cancel.addEventListener("click", (event) => {
+    dataObject.settings.overlay.close();
+  });
 
 
+//showMoreButton
+  let searchResults = [];
+  let remainingBooksResults = [];
+  const searchFragment = document.createDocumentFragment();
+  
+  /** 
+   * @param {object} object - The object that you want to extract the remaining results from.
+   * @returns {array} 
+   */
+  const remainingResults = (object) => {
+    const start = page * BOOKS_PER_PAGE;
+    const end = (page + 1) * BOOKS_PER_PAGE;
+    remainingBooksResults = object.slice(start, end);
+    page++;
+    return remainingBooksResults;
+  };
+  
+
+  const showMoreHandler = () => {
+    if (searchResults.length > 0) {
+      remainingResults(searchResults);
+      bookList(remainingBooksResults, searchFragment);
+      showMoreButton(searchResults);
+    } else {
+      remainingResults(books);
+      bookList(remainingBooksResults,listFragment);
+      showMoreButton(books);
+    }
+  };
+  
+  /** Show more button event listener */
+  dataObject.list.button.addEventListener("click", showMoreHandler);
+
+  
+/** Filters the books based on the user's search form entries.
+ * @param {array} books - 
+ * @param {object} filters 
+ */
+ /** Checks to see if the user's entry in the title field matches any of the book's titles.
+       * @returns {boolean} - Returns true or false based on whether the title matches or not.
+       */
+const filterBooks = (books, filters) => {
+    for (let book of books) {
+      let titleMatch =
+        filters.title.trim() === "" ||
+        book.title.toLowerCase().includes(filters.title.toLowerCase());
+      let authorMatch =
+        filters.author === "any" || book.author === filters.author;
+      let genreMatch = filters.genre === "any";
+      for (let singleGenre of book.genres) {
+        if (singleGenre === filters.genre) {
+          genreMatch = true;
+        }
+      }
+  
+      if (titleMatch && authorMatch && genreMatch) {
+        searchResults.push(book);
+      }
+    }
+  };
+  
+  const displayIfNoResults = () => {
+    searchResults.length < 1
+      ? dataObject.list.message.classList.add("list__message_show")
+      : dataObject.list.message.classList.remove("list__message_show");
+  };
+  
+  /** `searchResultsHandler` handles the search form submission and results event.
+   * @param {target} event - The form that the user has clicked on. (See related event listener below)
+   */
+  const searchResultsHandler = (event) => {
+    event.preventDefault();
+    page = 1;
+    searchResults.length = 0;
+    const formData = new FormData(event.target);
+    const filters = Object.fromEntries(formData);
+    filterBooks(books, filters);
+    displayIfNoResults();
+    dataObject.list.items.innerHTML = "";
+    extractDisplay(searchResults);
+    bookList(initialPageResults, searchResultsFragment);
+    showMoreButton(searchResults);
+    dataObject.search.overlay.close();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  dataObject.search.form.addEventListener("submit", searchResultsHandler);
+  
+  /** Search button event listener */
+  dataObject.header.search.addEventListener("click", (event) => {
+    dataObject.search.overlay.show();
+    dataObject.search.title.focus();
+  });
+  
+  /** Search overlay close button event listener */
+  dataObject.search.cancel.addEventListener("click", (event) => {
+    dataObject.search.overlay.close();
+  });
+  
+  let activeBook = "";
+  
+  /** Identifies the `activeBook` the user has clicked on to view the preview.
+   * @param {target} event - The event target that the user has clicked on
+   */
+  const identifyBook = (event) => {
+    let previewId = event.target.closest("[book-id]").getAttribute("book-id");
+  
+   
+    for (let singleBook of books) {
+      if (singleBook.id === previewId) {
+        activeBook = singleBook;
+      }
+    }
+  };
+  
+  /** Populates the preview overlay with the `activeBook` data.
+   * @param {object} activeBook - The object containing the data of the unique book that the user has clicked on
+   */
+  const populatePreview = (activeBook) => {
+    dataObject.list.image.setAttribute("src", activeBook.image);
+    dataObject.list.blur.setAttribute("src", activeBook.image);
+    dataObject.list.title.innerHTML = activeBook.title;
+  
+    dataObject.list.subtitle.innerHTML = `${authors[activeBook.author]} (${new Date(
+      activeBook.published
+    ).getFullYear()})`;
+    dataObject.list.description.innerHTML = activeBook.description;
+  };
+  
+  dataObject.list.items.addEventListener("click", (event) => {
+    identifyBook(event);
+    populatePreview(activeBook);
+    dataObject.list.active.show();
+  });
+  dataObject.list.close.addEventListener("click", (event) => {
+    dataObject.list.active.close();
+  });
 
 
 /*
