@@ -1,7 +1,8 @@
 import { BOOKS_PER_PAGE,books,authors,genres } from "./data.js"; // The script imports constants (BOOKS_PER_PAGE, books, authors, genres) from a separate data script.
 
 
-//object literal to reference elements
+//object literal to reference elementsdata
+/*Object that contains references to various HTML elements organized by different sections like header, list, search, and settings.*/
 
 const dataObject = {
     
@@ -36,6 +37,7 @@ const dataObject = {
                theme: document.querySelector("[data-settings-theme]"), },
   };
 //preview creates a button for books available
+/**createBookElement that takes an object with book details (author, image, title, id) and creates a button element with the book's information */
   const createBookElement = ({ author, image, title, id }) => {
     const preview = document.createElement("button");
     preview.classList = "preview";
@@ -58,6 +60,8 @@ let pageDisplay = [];
  * @param {object} object - object that you want to extract the initial results from.
  * @returns {array} - Returns the  results 
  */
+/*extractDisplay function takes an array of objects and extracts the initial results to be displayed, limited by the BOOKS_PER_PAGE constant. */
+
 const extractDisplay = (object) => {
   pageDisplay = object.slice(0, BOOKS_PER_PAGE);
   return pageDisplay;
@@ -68,7 +72,7 @@ extractDisplay(books);
 let pageBooks = books.slice(0, BOOKS_PER_PAGE);// books displayed on current page
 const listFragment = document.createDocumentFragment();
 
-const renderBookList = (object, fragment) => { //try change render
+const bookList = (object, fragment) => { 
     for (let { author, image, title, id } of object) {
       const preview = createBookElement({
         author,
@@ -81,9 +85,37 @@ const renderBookList = (object, fragment) => { //try change render
       dataObject.list.items.appendChild(fragment);
     }
   };
-  renderBookList(pageBooks, listFragment);// first page to load
+  bookList(pageBooks, listFragment);// first page to load
 
 
+  //genre
+  const authorFragment = document.createDocumentFragment();
+  const genreFragment = document.createDocumentFragment();
+  const genresOptionsDisplay = document.createElement("option");
+  genresOptionsDisplay.value = "any";
+  genresOptionsDisplay.textContent = "All Genres";
+  genreFragment.appendChild(genresOptionsDisplay);
+
+  for (let [id, genre] of Object.entries(genres)) {
+    let genreSelectedOption = document.createElement("option");
+    genreSelectedOption.value = id;
+    genreSelectedOption.textContent = genre;
+    genreFragment.appendChild(genreSelectedOption);
+  }
+  dataObject.search.genres.appendChild(genreFragment);
+
+  const authorsOptionDisplay = document.createElement("option");
+  authorsOptionDisplay.value = "any";
+  authorsOptionDisplay.textContent = "All Authors";
+  authorFragment.appendChild(authorsOptionDisplay);
+ 
+  for (let [id, author] of Object.entries(authors)) {
+    let authorSelectedOption = document.createElement("option");
+    authorSelectedOption.value = id;
+    authorSelectedOption.textContent = author;
+    authorFragment.appendChild(authorSelectedOption);
+  }
+  dataObject.search.authors.appendChild(authorFragment);
 
 /*
 if (!books && !Array.isArray(books)) throw new Error('Source required') 
